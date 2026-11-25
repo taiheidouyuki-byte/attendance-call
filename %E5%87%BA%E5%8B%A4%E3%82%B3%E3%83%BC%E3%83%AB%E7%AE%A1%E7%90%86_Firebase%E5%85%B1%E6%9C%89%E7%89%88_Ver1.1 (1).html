@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>出勤コール管理 試作品</title>
+<style>
+:root{--bg:#f4f6fa;--card:#fff;--ink:#182230;--muted:#667085;--line:#e5e9f0;--blue:#315efb;--green:#168653;--red:#d92d20;--amber:#b76e00}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Noto Sans JP",sans-serif}header{background:#15243a;color:white;padding:20px max(18px,calc((100vw - 1120px)/2));}header .sub{color:#c8d3e2;font-size:13px}main{max-width:1120px;margin:22px auto;padding:0 16px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.tag{background:#e8efff;color:#2448c7;border-radius:999px;padding:5px 10px;font-size:12px;font-weight:700}.notice{background:#fff8e6;border:1px solid #f4d58a;border-radius:12px;padding:12px 14px;color:#77500b;font-size:13px;margin:16px 0}.filters,.stats,.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:0 2px 8px #172b4d08}.filters{display:flex;gap:12px;align-items:end;flex-wrap:wrap;margin:16px 0}.field{display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--muted)}input,select,button{font:inherit}input,select{border:1px solid #cfd6e2;border-radius:9px;padding:9px 11px;background:white;color:var(--ink)}button{border:0;border-radius:9px;padding:9px 13px;background:var(--blue);color:white;font-weight:650;cursor:pointer}button.secondary{background:#edf1f7;color:#344054}button.warn{background:#fff0ee;color:#b42318}.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-bottom:16px}.stat small{color:var(--muted)}.stat strong{display:block;font-size:28px;margin-top:5px}.stat.good strong{color:var(--green)}.stat.bad strong{color:var(--red)}.stat.wait strong{color:var(--amber)}.layout{display:grid;grid-template-columns:minmax(0,1fr) 310px;gap:16px}.panel h2{font-size:16px;margin:0 0 12px}.tablewrap{overflow:auto}table{width:100%;border-collapse:separate;border-spacing:0;min-width:650px}th,td{text-align:left;padding:9px 7px;border-bottom:1px solid var(--line);font-size:13px;white-space:nowrap}th{color:var(--muted);font-weight:700;background:#f3f6fb;position:sticky;top:0;z-index:2}.grouphead td{background:#edf2fa;color:#243b63;font-weight:800;padding:10px 9px;border-bottom:1px solid #d7dfeb}.site-editor{border:1px solid var(--line);border-radius:12px;margin-top:14px;overflow:hidden;background:#fff}.site-editor-title{background:#edf2fa;color:#243b63;font-weight:800;padding:11px 13px;display:flex;justify-content:space-between;align-items:center}.site-editor .tablewrap{max-height:62vh}.site-editor table{min-width:max-content}.site-editor th.dayhead{text-align:center;min-width:68px;padding:9px 4px}.site-editor th.dayhead small{display:block;font-size:10px;font-weight:500;color:#667085}.site-editor th.weekend{background:#fff3f1}.site-editor th.sunday{color:#c2410c}.site-editor th.saturday{color:#2563eb}.site-editor td.daycell{padding:5px 3px;text-align:center}.site-editor td.daycell input{width:67px;padding:7px 3px;text-align:center;font-size:12px}.site-editor th:first-child,.site-editor td:first-child{position:sticky;left:0;z-index:1;background:#fff}.site-editor th:first-child{z-index:3;background:#f3f6fb}.site-editor th:last-child,.site-editor td:last-child{position:sticky;right:0;background:#fff;z-index:1}.site-editor th:last-child{z-index:3;background:#f3f6fb}.delete-btn{background:#fff0ee;color:#b42318;padding:6px 8px;font-size:11px}.employee-name-input{min-width:120px;width:145px;padding:7px 8px}.person{font-weight:700}.site{color:var(--muted);font-size:12px}.pill{display:inline-block;padding:4px 8px;border-radius:99px;font-size:11px;font-weight:700;white-space:nowrap}.ok{background:#e8f7ef;color:#087443}.late{background:#fff0ee;color:#b42318}.pending{background:#fff6df;color:#8a5700}.unknown{background:#eef1f5;color:#475467}.empty{padding:25px;text-align:center;color:var(--muted)}.side{display:flex;flex-direction:column;gap:16px}.log{font-size:12px;color:var(--muted);padding:9px 0;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:8px}.log-info{min-width:0}.log .delete-btn{flex-shrink:0}.log b{color:var(--ink)}.mapping{display:grid;grid-template-columns:1fr 100px;gap:8px;align-items:center;margin:8px 0;font-size:12px}.mapping input{width:100%;padding:6px}.muted{color:var(--muted);font-size:12px}.actions{display:flex;gap:6px;flex-wrap:wrap}.actions button{font-size:12px;padding:7px 9px}.foot{color:var(--muted);font-size:11px;margin:16px 2px 30px}@media(max-width:780px){.layout{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}header{padding:18px}}
+</style></head><body>
+<header><div class="top"><div><div style="font-size:21px;font-weight:800">出勤コール管理</div><div class="sub">全拠点共通・試作版　｜　拠点別手入力・Excel読み込み対応</div></div><div class="actions"><span class="tag">FIREBASE共有版 Ver.1.1</span><button class="secondary" id="logoutButton" onclick="logout()" style="display:none">ログアウト</button></div></div></header>
+<section id="loginPanel" style="max-width:420px;margin:30px auto;padding:22px;background:white;border:1px solid #e5e9f0;border-radius:16px;box-shadow:0 2px 8px #172b4d08">
+<h2 style="margin:0 0 8px">ログイン</h2><p class="muted">会社から発行されたメールアドレスとパスワードを入力してください。</p>
+<label class="field" style="margin-top:14px">メールアドレス<input id="loginEmail" type="email" autocomplete="username" placeholder="メールアドレス"></label>
+<label class="field" style="margin-top:12px">パスワード<input id="loginPassword" type="password" autocomplete="current-password" placeholder="パスワード"></label>
+<button id="loginButton" style="width:100%;margin-top:16px" onclick="login()">ログイン</button>
+<div id="loginMessage" class="muted" style="margin-top:12px" role="status"></div>
+</section>
+<main id="appMain" style="display:none"><div class="top"><div><h1 style="font-size:22px;margin:0">本日の出勤状況</h1><div class="muted" id="dateLabel"></div></div><div class="actions"><button class="secondary" onclick="clearLogs()">テスト履歴を全消去</button></div></div>
+<div class="notice"><b>共有データ：</b>ログイン中の全員で同じシフト・従業員・着信履歴を共有します。変更はクラウドに保存されます。着信の自動取得はまだ未接続です。</div>
+<section class="panel" style="margin:16px 0"><div class="top"><div><h2 style="margin:0 0 4px">月間シフト入力</h2><div class="muted">対象月を選び、拠点ごとに従業員をまとめて表示しています。各従業員の出勤時刻を入力してください。空欄は休みとして扱います。</div></div><div class="actions"><label class="field">入力する月<input type="month" id="editMonth" value="2026-11"></label><button class="secondary" onclick="addSite()">拠点を追加</button><button class="secondary" onclick="addEmployee()">従業員を追加</button><button onclick="saveSchedule()">月間シフトを保存</button></div></div><div id="editorSites"></div><div class="muted" style="margin-top:10px">各拠点の表に日付・曜日を表示しています。横にスクロールして月末まで入力できます。入力例：07:00、14:00、22:00。空欄は休みです。</div></section>
+<section class="panel" style="margin:16px 0">
+ <div class="top"><div><h2 style="margin:0 0 4px">Excelシフト読み込み</h2><div class="muted">「出金確認.xlsx」の形式に対応。従業員名・電話番号・拠点名・開始時刻・日別勤務マークを読み込みます。</div></div><span class="tag">Excel .xlsx 対応</span></div>
+ <div class="actions" style="margin-top:12px;align-items:end"><label class="field">Excelファイルを選択<input id="excelFile" type="file" accept=".xlsx,.xls" /></label><button onclick="importExcel()">Excelを読み込む</button></div>
+ <div class="muted" style="margin-top:9px">読み込み対象：1行目の日付（対象月）、2行目の見出し、3行目以降の従業員データ。拠点名が空欄の行は読み込み対象外です。既存の他の月のシフトは保持します。同じ月のシフトは読み込んだ内容に置き換わります。</div>
+ <div id="importResult" class="muted" style="margin-top:10px" aria-live="polite"></div>
+</section><section class="filters"><label class="field">対象日<input type="date" id="date"></label><label class="field">拠点<select id="site"><option value="all">全拠点</option></select></label><label class="field">状態<select id="status"><option value="all">すべて</option><option value="pending">未コール</option><option value="late">期限超過</option><option value="ok">コール済み</option></select></label><button onclick="render()">表示更新</button></section>
+<section class="stats"><div class="stat"><small>出勤予定</small><strong id="total">0</strong></div><div class="stat good"><small>コール確認済み</small><strong id="done">0</strong></div><div class="stat wait"><small>未コール</small><strong id="pending">0</strong></div><div class="stat bad"><small>期限超過</small><strong id="late">0</strong></div><div class="stat wait"><small>時刻未設定</small><strong id="unknownCount">0</strong></div></section>
+<div class="layout"><section class="panel"><h2>出勤者一覧</h2><div class="tablewrap"><table><thead><tr><th>従業員</th><th>拠点</th><th>シフト</th><th>出勤予定</th><th>コール期限</th><th>着信</th><th>判定</th><th>操作</th></tr></thead><tbody id="rows"></tbody></table></div><div class="muted" style="margin-top:10px">※出勤時刻は月間シフト入力で登録した時刻を使用します。</div></section>
+<aside class="side"><section class="panel"><h2>テスト着信を登録</h2><label class="field">従業員<select id="personSelect"></select></label><label class="field" style="margin-top:10px">着信日時<input type="datetime-local" id="callTime"></label><button style="width:100%;margin-top:12px" onclick="addCall()">着信を登録する</button><div class="muted" style="margin-top:9px">選択した従業員のテスト着信として記録します。</div></section>
+<section class="panel"><h2>最近の着信履歴</h2><div id="logs"><div class="empty">履歴はまだありません</div></div></section>
+</aside></div>
+<div class="foot">Firebase Firestoreに共有保存します。ログインできるユーザーは全員、全拠点の閲覧・編集ができます。Android端末からの着信自動取得は別途実装が必要です。</div></main>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+const DEFAULT_SITES=["府中緑町","平塚橋","花見川"];
+const DEFAULT_STAFF=[
+["府中緑町","足立 秀彦"],["府中緑町","藤原 祐輔"],["府中緑町","田山 政美"],
+["平塚橋","平良 保昇"],["平塚橋","小川 好一"],["平塚橋","小栁 則夫"],["平塚橋","大島 將美"],["平塚橋","武内 涼"],["平塚橋","佐藤 涼"],["平塚橋","本假屋 明憲"],["平塚橋","森下 大輔"],["平塚橋","池上 裕司"],
+["花見川","知脇 圭佑"],["花見川","古賀 亮太"],["花見川","山崎 孝一"],["花見川","立石 裕之"]
+];
+const STORE='attendanceCallManualV2';
+const firebaseConfig={apiKey:'AIzaSyA1_DENFiDa6gYmAAb3lAHxu4ma-4bALQ8',authDomain:'skstandup-2cae5.firebaseapp.com',projectId:'skstandup-2cae5',storageBucket:'skstandup-2cae5.firebasestorage.app',messagingSenderId:'296148477142',appId:'1:296148477142:web:e8f348c77f865eb957d577',measurementId:'G-C5FWMZZLSY'};
+firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth(),db=firebase.firestore(),sharedDoc=db.collection('attendanceCall').doc('sharedData');
+let sites=[...DEFAULT_SITES];let staff=DEFAULT_STAFF.map((x,i)=>({id:'p'+i,site:x[0],name:x[1],phone:''}));let schedules={},logs=[];let cloudReady=false;let saveTimer=null;
+const dateEl=document.getElementById('date'),monthEl=document.getElementById('editMonth');
+const today=new Date();dateEl.value=today.toISOString().slice(0,10);monthEl.value=dateEl.value.slice(0,7);
+function persist(){const data={sites,staff,schedules,logs,updatedAt:firebase.firestore.FieldValue.serverTimestamp()};localStorage.setItem(STORE,JSON.stringify({sites,staff,schedules,logs}));if(cloudReady&&auth.currentUser){clearTimeout(saveTimer);saveTimer=setTimeout(()=>sharedDoc.set(data).catch(e=>{console.error(e);alert('クラウド保存に失敗しました。通信状態とFirestoreルールを確認してください。')}),250)}}
+async function login(){const email=document.getElementById('loginEmail').value.trim(),password=document.getElementById('loginPassword').value;const msg=document.getElementById('loginMessage');if(!email||!password){msg.textContent='メールアドレスとパスワードを入力してください。';return}msg.textContent='ログインしています…';document.getElementById('loginButton').disabled=true;try{await auth.signInWithEmailAndPassword(email,password)}catch(e){msg.textContent='ログインできませんでした。メールアドレスとパスワードを確認してください。';document.getElementById('loginButton').disabled=false}}
+async function logout(){await auth.signOut()}
+auth.onAuthStateChanged(async user=>{const panel=document.getElementById('loginPanel'),main=document.getElementById('appMain'),out=document.getElementById('logoutButton');if(!user){cloudReady=false;panel.style.display='block';main.style.display='none';out.style.display='none';document.getElementById('loginButton').disabled=false;return}document.getElementById('loginMessage').textContent='共有データを読み込んでいます…';try{const snap=await sharedDoc.get();if(snap.exists){const d=snap.data();sites=d.sites||[...DEFAULT_SITES];staff=d.staff||[];schedules=d.schedules||{};logs=d.logs||[]}else{const local=JSON.parse(localStorage.getItem(STORE)||'{}');sites=local.sites||[...DEFAULT_SITES];staff=local.staff||DEFAULT_STAFF.map((x,i)=>({id:'p'+i,site:x[0],name:x[1],phone:''}));schedules=local.schedules||{};logs=local.logs||[];await sharedDoc.set({sites,staff,schedules,logs,updatedAt:firebase.firestore.FieldValue.serverTimestamp()})}cloudReady=true;panel.style.display='none';main.style.display='block';out.style.display='inline-block';rebuildSiteFilter();renderEditor();render();sharedDoc.onSnapshot(s=>{if(!s.exists||!cloudReady)return;const d=s.data();if(d.updatedAt&&d.updatedAt.toMillis&&Date.now()-d.updatedAt.toMillis()<1500)return;sites=d.sites||sites;staff=d.staff||staff;schedules=d.schedules||schedules;logs=d.logs||logs;localStorage.setItem(STORE,JSON.stringify({sites,staff,schedules,logs}));rebuildSiteFilter();renderEditor();render()})}catch(e){console.error(e);document.getElementById('loginMessage').textContent='データを読み込めません。Firestoreのルール設定を確認してください。';await auth.signOut()}});
+function rebuildSiteFilter(){const sel=document.getElementById('site'),v=sel.value;sel.innerHTML='<option value="all">全拠点</option>'+sites.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');if(sites.includes(v))sel.value=v}
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function daysInMonth(m){let [y,mo]=m.split('-').map(Number);return new Date(y,mo,0).getDate()}
+function monthKey(m){return m}
+function scheduleForMonth(m){schedules[monthKey(m)] ||= {};return schedules[monthKey(m)]}
+function renderEditor(){
+ let m=monthEl.value;if(!m)return;
+ let days=daysInMonth(m),sch=scheduleForMonth(m),host=document.getElementById('editorSites');
+ const weekdays=['日','月','火','水','木','金','土'];
+ host.innerHTML=sites.map((siteName,siteIndex)=>{
+   const members=staff.filter(p=>p.site===siteName);
+   const head=`<thead><tr><th>従業員名</th><th>電話番号</th>${Array.from({length:days},(_,i)=>{let d=new Date(Number(m.slice(0,4)),Number(m.slice(5,7))-1,i+1),w=d.getDay();return `<th class="dayhead ${w===0?'weekend sunday':w===6?'weekend saturday':''}">${i+1}日<small>${weekdays[w]}</small></th>`}).join('')}<th>削除</th></tr></thead>`;
+   const rows=members.map(p=>`<tr><td><input class="employee-name-input" value="${esc(p.name)}" data-person="${p.id}" data-field="name" aria-label="${esc(p.name)}の名前"></td><td><input class="employee-name-input" style="width:130px;min-width:120px" value="${esc(p.phone||'')}" data-person="${p.id}" data-field="phone" aria-label="${esc(p.name)}の電話番号" placeholder="電話番号"></td>${Array.from({length:days},(_,i)=>{let v=sch[p.id]?.[i+1]||'';let unset=v==='未設定';return `<td class="daycell"><input aria-label="${esc(p.name)} ${i+1}日出勤時刻" title="${unset?'勤務あり・時刻未設定':'空欄は休み'}" type="time" data-person="${p.id}" data-day="${i+1}" data-unset="${unset?'1':'0'}" value="${unset?'':esc(v)}"></td>`}).join('')}<td><button class="delete-btn" onclick="removeEmployee('${p.id}')" title="${esc(p.name)}さんを削除">削除</button></td></tr>`).join('');
+   return `<section class="site-editor"><div class="site-editor-title"><span>${esc(siteName)}</span><span style="display:flex;align-items:center;gap:10px"><span style="font-size:12px;font-weight:500">${members.length}人</span><button class="delete-btn" onclick="removeSite('${esc(siteName)}')">拠点を削除</button></span></div><div class="tablewrap"><table>${head}<tbody>${rows||`<tr><td colspan="${days+3}" class="empty">この拠点には従業員がいません。「従業員を追加」から登録できます。</td></tr>`}</tbody></table></div></section>`;
+ }).join('')||'<div class="empty">拠点を追加してください。</div>';
+}
+function addSite(){let name=prompt('追加する拠点名を入力してください');if(!name||!name.trim())return;name=name.trim();if(sites.some(x=>x.toLowerCase()===name.toLowerCase())){alert('同じ名前の拠点は既に登録されています');return}sites.push(name);persist();let filter=document.getElementById('site');let opt=document.createElement('option');opt.value=name;opt.textContent=name;filter.append(opt);renderEditor();render();alert('「'+name+'」を拠点に追加しました')}
+function removeSite(siteName){
+ if(!sites.includes(siteName))return;
+ const members=staff.filter(p=>p.site===siteName);
+ if(members.length){
+  const destinations=sites.filter(x=>x!==siteName);
+  if(!destinations.length){alert('従業員が所属しているため削除できません。先に別の拠点を追加してください。');return;}
+  const dest=prompt(`「${siteName}」には従業員が${members.length}人います。\n移動先の拠点名を入力してください：\n${destinations.join(' / ')}`,destinations[0]);
+  if(dest===null)return;
+  if(!destinations.includes(dest.trim())){alert('一覧にある拠点名を入力してください。');return;}
+  members.forEach(p=>p.site=dest.trim());
+ }
+ if(!confirm(`拠点「${siteName}」を削除しますか？${members.length?`\n所属従業員 ${members.length}人は別拠点へ移動します。`:''}`))return;
+ sites=sites.filter(x=>x!==siteName);
+ const sel=document.getElementById('site');Array.from(sel.options).forEach(o=>{if(o.value===siteName)o.remove()});
+ if(sel.value===siteName)sel.value='all';
+ persist();renderEditor();render();
+}
+function addEmployee(){let name=prompt('従業員名を入力してください');if(!name||!name.trim())return;let site=sites[0];if(sites.length>1){let choice=prompt('所属拠点を入力してください：'+sites.join(' / '),site);if(choice===null)return;if(!sites.includes(choice.trim())){alert('登録済みの拠点名を入力してください');return}site=choice.trim()}let phone=prompt('電話番号を入力してください（省略可）','')||'';phone=phone.replace(/[^0-9+]/g,'');staff.push({id:'p'+Date.now()+Math.random().toString(16).slice(2,6),name:name.trim(),site,phone});persist();renderEditor();render();}
+function removeEmployee(id){let p=staff.find(x=>x.id===id);if(!p)return;if(!confirm('「'+p.name+'」さんを従業員登録から削除しますか？\nこの従業員の月間シフトとテスト着信履歴も削除されます。'))return;staff=staff.filter(x=>x.id!==id);for(const m of Object.keys(schedules)){if(schedules[m])delete schedules[m][id]}logs=logs.filter(l=>l.personId!==id);persist();renderEditor();render();alert('「'+p.name+'」さんを削除しました')}
+function saveSchedule(){let m=monthEl.value;if(!m){alert('対象月を選択してください');return}let sch=scheduleForMonth(m);document.querySelectorAll('#editorSites [data-person]').forEach(el=>{let p=staff.find(x=>x.id===el.dataset.person);if(!p)return;if(el.dataset.field==='name'){p.name=el.value.trim()||p.name}else if(el.dataset.field==='phone'){p.phone=el.value.replace(/[^0-9+]/g,'')}else if(el.dataset.field==='site'){p.site=el.value}else if(el.dataset.day){sch[p.id] ||= {};if(el.value)sch[p.id][el.dataset.day]=el.value;else if(el.dataset.unset==='1')sch[p.id][el.dataset.day]='未設定';else delete sch[p.id][el.dataset.day]}});persist();renderEditor();render();alert('月間シフトを保存しました')}
+function excelTime(v){
+ if(v===null||v===undefined||v==='')return '';
+ if(v instanceof Date)return String(v.getHours()).padStart(2,'0')+':'+String(v.getMinutes()).padStart(2,'0');
+ if(typeof v==='number'){
+   // Excel time values are fractions of a day; date-time serials use the fractional part.
+   let frac=v-Math.floor(v);let mins=Math.round(frac*1440);if(mins>=1440)mins=0;
+   return String(Math.floor(mins/60)).padStart(2,'0')+':'+String(mins%60).padStart(2,'0');
+ }
+ let m=String(v).match(/(\d{1,2})[:：](\d{2})/);return m?String(+m[1]).padStart(2,'0')+':'+m[2]:'';
+}
+function excelMonth(v,cell){
+ if(cell && cell.t==='d' && v instanceof Date)return v.getFullYear()+'-'+String(v.getMonth()+1).padStart(2,'0');
+ if(typeof v==='number' && window.XLSX){let d=XLSX.SSF.parse_date_code(v);if(d&&d.y&&d.m)return d.y+'-'+String(d.m).padStart(2,'0');}
+ if(v instanceof Date)return v.getFullYear()+'-'+String(v.getMonth()+1).padStart(2,'0');
+ let t=String(v??'');let m=t.match(/(20\d{2})[年\/-](\d{1,2})/);return m?m[1]+'-'+String(+m[2]).padStart(2,'0'):'';
+}
+async function importExcel(){
+ const file=document.getElementById('excelFile').files[0],out=document.getElementById('importResult');
+ if(!file){alert('先にExcelファイルを選択してください');return;}
+ if(!window.XLSX){out.textContent='Excel読み込みライブラリを読み込めませんでした。インターネット接続を確認して、ページを再読み込みしてください。';return;}
+ try{
+  const buf=await file.arrayBuffer();const wb=XLSX.read(buf,{type:'array',cellDates:true});const ws=wb.Sheets[wb.SheetNames[0]];
+  const matrix=XLSX.utils.sheet_to_json(ws,{header:1,raw:true,defval:null});
+  let headerIndex=matrix.findIndex(r=>r.some(v=>String(v??'').trim()==='従業員名'));
+  if(headerIndex<0)throw new Error('「従業員名」の見出しが見つかりません。指定のExcel形式か確認してください。');
+  const header=matrix[headerIndex];
+  const dateCell=ws['A1'];let month=excelMonth(matrix[0]?.[0],dateCell);
+  if(!month){
+    const dayHeaders=header.slice(4).map(Number).filter(n=>n>=1&&n<=31);if(!dayHeaders.length)throw new Error('対象月を読み取れません。A1セルに対象月の日付を入れてください。');
+    month=monthEl.value||new Date().toISOString().slice(0,7);
+  }
+  const days=daysInMonth(month);const colByDay={};header.forEach((v,i)=>{let n=Number(v);if(i>=4&&Number.isInteger(n)&&n>=1&&n<=31)colByDay[n]=i;});
+  let imported=0,addedStaff=0,addedSites=0,skipped=0,noTime=0;const importedSchedules={};
+  for(let ri=headerIndex+1;ri<matrix.length;ri++){
+   const row=matrix[ri]||[];const name=String(row[0]??'').trim();const phone=String(row[1]??'').replace(/[^0-9+]/g,'').trim();const site=String(row[2]??'').trim();const start=excelTime(row[3]);
+   if(!name&&!site)continue;
+   if(!name||!site){skipped++;continue;}
+   if(!sites.includes(site)){sites.push(site);addedSites++;}
+   let person=staff.find(x=>x.site===site&&x.name.trim()===name&&((phone&&x.phone&&x.phone===phone)||(!phone||!x.phone)));
+   if(!person){person={id:'p'+Date.now()+Math.random().toString(16).slice(2,8),name,site,phone};staff.push(person);addedStaff++;}
+   else{person.name=name;person.site=site;person.phone=phone||person.phone||'';}
+   let daysForPerson={};let hasMarked=false;
+   for(let d=1;d<=days;d++){
+    const ci=colByDay[d];if(ci===undefined)continue;const mark=row[ci];
+    if(mark!==null&&mark!==undefined&&String(mark).trim()!==''&&!(typeof mark==='number'&&mark===0)&&String(mark).trim()!=='0'){hasMarked=true;daysForPerson[d]=start||'未設定';}
+   }
+   if(hasMarked&&!start)noTime++;
+   importedSchedules[person.id]=daysForPerson;imported++;
+  }
+  if(!imported)throw new Error('読み込める従業員データがありません。従業員名と拠点名が入力されている行を確認してください。');
+  // Only replace the selected month's schedule; other months remain intact.
+  schedules[month]={...importedSchedules};monthEl.value=month;dateEl.value=month+'-01';
+  // Rebuild site filter while preserving the all-sites option.
+  const siteSelect=document.getElementById('site');siteSelect.innerHTML='<option value="all">全拠点</option>'+sites.map(x=>`<option value="${esc(x)}">${esc(x)}</option>`).join('');
+  persist();renderEditor();render();
+  out.innerHTML=`<b style="color:#087443">読み込み完了：</b>${esc(month)}分／${imported}名。新規拠点 ${addedSites}件、新規従業員 ${addedStaff}名。`+(skipped?` 拠点名または従業員名がないため ${skipped}行を除外。`:'')+(noTime?` 勤務マークはあるものの開始時刻がない従業員 ${noTime}名は、時刻未設定として一覧に表示します。`:'');
+ }catch(e){out.textContent='読み込みエラー：'+e.message;}
+}
+function staffForDate(date){let m=date.slice(0,7),day=Number(date.slice(8,10)),sch=schedules[m]||{};return staff.flatMap(p=>{let days=sch[p.id];if(!days||!Object.prototype.hasOwnProperty.call(days,day))return [];let time=days[day];return [{...p,time:time||'未設定',day}]})}
+function deadline(p,date){if(!p.time||p.time==='未設定')return null;let [h,m]=p.time.split(':').map(Number),dt=new Date(date+'T00:00:00');dt.setHours(h,m,0,0);dt.setHours(dt.getHours()-1);return dt}
+function fmt(dt){return dt?dt.toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit',hour12:false}):'—'}
+function callsFor(p,date){return logs.filter(l=>l.date===date&&l.personId===p.id).sort((a,b)=>a.time.localeCompare(b.time))}
+function statusFor(p,date){if(p.time==='未設定')return 'unknown';let dl=deadline(p,date),calls=callsFor(p,date);if(calls.length)return new Date(calls[0].time)<=dl?'ok':'late';return new Date()>dl?'late':'pending'}
+function render(){let date=dateEl.value;document.getElementById('dateLabel').textContent=date+' のシフト';let people=staffForDate(date);let site=document.getElementById('site').value,filter=document.getElementById('status').value;if(site!=='all')people=people.filter(p=>p.site===site);let counts={ok:0,late:0,pending:0,unknown:0};let visible=[];for(let p of people){let st=statusFor(p,date);counts[st]++;if(filter!=='all'&&st!==filter)continue;visible.push({p,st})}
+ const siteOrder=sites.filter(x=>visible.some(v=>v.p.site===x));const rows=[];for(const siteName of siteOrder){const group=visible.filter(x=>x.p.site===siteName);if(!group.length)continue;rows.push(`<tr class="grouphead"><td colspan="8">${esc(siteName)} <span style="font-weight:500;color:#667085">｜ ${group.length}人</span></td></tr>`);for(const {p,st} of group){let dl=deadline(p,date),cs=callsFor(p,date),call=cs.length?fmt(new Date(cs[0].time)):'—',label={ok:'確認済み',late:'期限超過',pending:'未コール',unknown:'時刻未設定'}[st],cls={ok:'ok',late:'late',pending:'pending',unknown:'unknown'}[st];rows.push(`<tr><td><div class="person">${esc(p.name)}</div></td><td><span class="site">${esc(p.site)}</span></td><td>${p.time==='未設定'?'勤務あり':'手入力'}</td><td>${p.time==='未設定'?'—':esc(p.time)}</td><td>${fmt(dl)}</td><td>${call}</td><td><span class="pill ${cls}">${label}</span></td><td>${p.time==='未設定'?'—':`<button class="secondary" onclick="quickCall('${p.id}')">着信テスト</button>`}</td></tr>`)}}
+ document.getElementById('total').textContent=people.length;document.getElementById('done').textContent=counts.ok;document.getElementById('pending').textContent=counts.pending;document.getElementById('late').textContent=counts.late;document.getElementById('unknownCount').textContent=counts.unknown;document.getElementById('rows').innerHTML=rows.join('')||'<tr><td colspan="8" class="empty">この日の出勤予定はありません。上の「月間シフト入力」から時刻を登録してください。</td></tr>';
+ let sel=document.getElementById('personSelect');sel.innerHTML=people.filter(p=>p.time!=='未設定').map(p=>`<option value="${p.id}">${esc(p.name)}（${esc(p.site)}）</option>`).join('');renderLogs()}
+function localDateTime(){let d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,16)}
+function quickCall(id){document.getElementById('personSelect').value=id;document.getElementById('callTime').value=localDateTime();addCall()}
+function addCall(){let id=document.getElementById('personSelect').value,p=staff.find(x=>x.id===id),dt=document.getElementById('callTime').value;if(!p){alert('対象者がいません');return}if(!dt){alert('着信日時を入力してください');return}logs.push({personId:id,name:p.name,site:p.site,time:dt,date:dt.slice(0,10)});persist();render()}
+function renderLogs(){let target=document.getElementById('logs'),list=logs.map((l,index)=>({...l,_index:index})).sort((a,b)=>b.time.localeCompare(a.time)).slice(0,8);target.innerHTML=list.length?list.map(l=>`<div class="log"><div class="log-info"><b>${esc(l.name)}</b> <span>(${esc(l.site)})</span><br>${esc(l.time.replace('T',' '))}</div><button class="delete-btn" onclick="removeCall(${l._index})">取り消す</button></div>`).join(''):'<div class="empty">履歴はまだありません</div>'}
+function removeCall(index){let l=logs[index];if(!l)return;let label=(l.name||'従業員')+'（'+(l.site||'拠点不明')+'） '+(l.time||'');if(!confirm(label+' のテスト着信を取り消しますか？\nこの1件だけを削除します。'))return;logs.splice(index,1);persist();render()}
+function clearLogs(){if(confirm('テスト着信履歴をすべて削除しますか？')){logs=[];persist();render()}}
+monthEl.addEventListener('change',renderEditor);dateEl.addEventListener('change',render);document.getElementById('site').addEventListener('change',render);document.getElementById('status').addEventListener('change',render);document.getElementById('loginPassword').addEventListener('keydown',e=>{if(e.key==='Enter')login()});
+</script></body></html>
